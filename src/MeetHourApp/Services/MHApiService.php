@@ -21,8 +21,7 @@ use MeetHourApp\Types\ViewMeeting;
 
 class MHApiService {
     private const BASE_URL = 'https://api.meethour.io';
-    private const API_VERSION = 'v1.1';
-    private const GRANT_TYPE = 'password';
+    private const API_VERSION = 'v1.2';
 
     private $httpClient;
     private static $accessToken;
