@@ -1,16 +1,25 @@
 <?php
-namespace App\Services;
+namespace MeetHourApp\Services;
 
-//require ('../../../vendor/autoload.php'); 
-
-use \GuzzleHttp\Client;
+use GuzzleHttp\Client;
 use \GuzzleHttp\Exception\GuzzleException;
 use \GuzzleHttp\RequestOptions;
-use LoginType;
-use RefreshTokenType;
-use ScheduleMeetingType;
+use MeetHourApp\Types\ScheduleMeeting;
+use MeetHourApp\Types\AddContact;
+use MeetHourApp\Types\ArchiveMeeting;
+use MeetHourApp\Types\CompletedMeetings;
+use MeetHourApp\Types\ContactsList;
+use MeetHourApp\Types\EditContact;
+use MeetHourApp\Types\EditMeeting;
+use MeetHourApp\Types\GenerateJwt;
+use MeetHourApp\Types\Login;
+use MeetHourApp\Types\MissedMeetings;
+use MeetHourApp\Types\RecordingsList;
+use MeetHourApp\Types\RefreshToken;
+use MeetHourApp\Types\UpcomingMeetings;
+use MeetHourApp\Types\ViewMeeting;
 
-class ApiService {
+class MHApiService {
     private const BASE_URL = 'https://api.meethour.io';
     private const API_VERSION = 'v1.1';
     private const GRANT_TYPE = 'password';
@@ -53,7 +62,7 @@ class ApiService {
             case 'missed_meetings':
                 return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/missedmeetings';
             case 'completed_meetings':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/completedmeeting';
+                return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/completedmeetings';
             case 'user_details':
                 return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/user_details';
             case 'refresh_token':
@@ -80,17 +89,17 @@ class ApiService {
 
     /**
      * postFetch() : For making Post HTTP Methods via Guzzle HTTP Client
-     * @param {string} endpoint End Point types.
-     * @param {any} body API call body.
-     * @param {PathParam} pathParam additional parameters to be passed to API
-     * @returns {string} response data that we get from API
+     * @param string $token endpoint End Point types.
+     * @param string $endpoint  endpoint End Point types.
+     * @param array  $body API call body.
+     * @param array $pathParam  endpoint End Point types.
+     * @return mixed response data that we get from API
     **/
-         private static function postFetch(string $token, string $endpoint, $body, array $pathParam = []) {
+         private static function postFetch(string $token, string $endpoint, array $body, array $pathParam = []) {
         $constructedUrl = self::substitutePathParameter(
             self::apiEndpointUrl($endpoint),
             $pathParam
         );
-        var_dump($body);
         try {
             $client = new Client();
             $response = $client->post($constructedUrl, [
@@ -98,10 +107,9 @@ class ApiService {
                 'json' => $body
             ]);
             if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 600) {
-                echo 'Bad response from server.', $response;
+                echo 'Bad response from server.', $response->getBody();
                 return null;
             }
-            var_dump($response);
             return json_decode($response->getBody());
         } catch (\Exception $error) {
             echo $error;
@@ -111,25 +119,22 @@ class ApiService {
 
     /**
      * login(): To authenticate and login to get access token
-     * @param string $grant_type Grant Type. Accepts "password"
-     * @param string $client_id Client ID -> Get it from Developers page.
-     * @param string $client_secret Client Secret -> Get it from Developers page.
-     * @param string $username Username -> Email account used to Signup for Meet Hour
-     * @param string $password Password -> Password of your Meet Hour account.
+     * @param Login $loginObject Grant Type. Accepts "password"
      * @return mixed response data that we get from API.
      */
-    public function login($body) {
+    public function login(Login $loginObject) {
+        $body = $loginObject->prepare();
         return self::postFetch('', 'login', $body);
     }
 
     /**
      * getRefreshToken(): To get new token from refresh token
      * @param string $token access token to make API calls.
-     * @param mixed $body API call body.
+     * @param RefreshToken $refreshTokenObject API call body.
      * @return mixed response data that we get from API.
      */
-    public static function getRefreshToken(string $token, $body) {
-
+    public static function getRefreshToken(string $token, RefreshToken $refreshTokenObject) {
+        $body = $refreshTokenObject->prepare();
         return self::postFetch($token, 'refresh_token', $body);
     }
 
@@ -139,33 +144,35 @@ class ApiService {
      * @return mixed response data that we get from API.
      */
     public static function userDetails(string $token) {
-        return self::postFetch($token, 'user_details', '');
+        return self::postFetch($token, 'user_details', []);
     }
 
      /**
      * generateJwt() : JWT is needed to join the meeting with user information. Usually used if Moderator is joining.
-     * @param {string} token - access token to make API calls.
-     * @param {any} body - API call body.
-     * @returns {string} response data that we get from API.
+     * @param string $token - access token to make API calls.
+     * @param GenerateJwt $generateJwtObject - API call body.
+     * @return mixed response data that we get from API.
      */
-    public static function generateJwt($token, $body) {
+    public static function generateJwt($token, GenerateJwt $generateJwtObject) {
+        $body = $generateJwtObject->prepare();
         return self::postFetch($token, 'get_jwt', $body);
     }
 
     /**
      * addContact() : To add contact in Meet Hour Database.
-     * @param {string} token - access token to make API calls.
-     * @param {any} body - API call body.
-     * @returns {string} response data that we get from API.
+     * @param string $token - access token to make API calls.
+     * @param AddContact $addContactObject - API call body.
+     * @return mixed response data that we get from API.
      */
-    public static function addContact($token, $body) {
+    public static function addContact($token, AddContact $addContactObject) {
+        $body = $addContactObject->prepare();
         return self::postFetch($token, 'add_contact', $body);
     }
 
     /**
      * timezone() : To get all the timezones used in Meet Hour while Meeting is being Scheduled.
-     * @param {string} token - access token to make API calls.
-     * @returns {string} response data that we get from API.
+     * @param string $token - access token to make API calls.
+     * @return mixed response data that we get from API.
      */
     public static function timezone($token) {
         return self::postFetch($token, 'timezone', []);
@@ -173,107 +180,117 @@ class ApiService {
 
     /**
      * contactsList() : To get all the contacts available on Meet Hour account.
-     * @param {string} token - access token to make API calls.
-     * @param {ContactsType} body - API call body.
-     * @returns {string} response data that we get from API.
+     * @param string $token - access token to make API calls.
+     * @param ContactsList $contactsListObject - API call body.
+     * @return mixed response data that we get from API.
      */
-    public static function contactsList($token, $body) {
+    public static function contactsList($token, ContactsList $contactsListObject) {
+        $body = $contactsListObject->prepare();
         return self::postFetch($token, 'contacts_list', $body);
     }
 
     /**
      * editContact() : To edit a specific contact.
-     * @param {string} token - access token to make API calls.
-     * @param {any} body - API call body.
-     * @returns {string} response data that we get from API.
+     * @param string $token - access token to make API calls.
+     * @param EditContact $editContactObject - API call body.
+     * @return mixed response data that we get from API.
      */
-    public static function editContact($token, $body) {
+    public static function editContact($token, EditContact $editContactObject) {
+        $body = $editContactObject->prepare();
         return self::postFetch($token, 'edit_contact', $body);
     }
 
     
     /**
      * scheduleMeeting() : Function to hit a Schedule Meeting API.
-     * @param {string} token - access token to make API calls.
-     * @param {array} body - API call body.
-     * @returns {string} response data that we get from API.
+     * @param string $token - access token to make API calls.
+     * @param ScheduleMeeting $scheduleMeetingObject - API call body.
+     * @return mixed response data that we get from API.
      */
-    public static function scheduleMeeting($token, ScheduleMeetingType $body)
+    public static function scheduleMeeting($token, ScheduleMeeting $scheduleMeetingObject)
     {
+        $body = $scheduleMeetingObject->prepare();
         return self::postFetch($token, 'schedule_meeting', $body);
     }
 
     /**
      * upcomingMeetings() : Function to hit a Schedule Meeting API.
-     * @param {string} token - access token to make API calls.
-     * @param {array} body - API call body.
-     * @returns {string} response data that we get from API.
+     * @param string $token - access token to make API calls.
+     * @param UpcomingMeetings $upcomingMeetingsObject - API call body.
+     * @return mixed response data that we get from API.
      */
-    public static function upcomingMeetings($token, $body)
+    public static function upcomingMeetings($token, UpcomingMeetings $upcomingMeetingsObject)
     {
+        $body = $upcomingMeetingsObject->prepare();
         return self::postFetch($token, 'upcoming_meeting', $body);
     }
 
     /**
      * archiveMeeting() : To get archive Meeting
-     * @param {string} token - access token to make API calls.
-     * @param {array} body - API call body.
-     * @returns {string} response data that we get from API.
+     * @param string $token - access token to make API calls.
+     * @param ArchiveMeeting $archiveMeeting - API call body.
+     * @return mixed response data that we get from API.
      */
-    public static function archiveMeeting($token, $body)
+    public static function archiveMeeting($token, ArchiveMeeting $archiveMeeting)
     {
+        $body = $archiveMeeting->prepare();
         return self::postFetch($token, 'archive_meeting', $body);
     }
 
     /**
      * missedMeetings() : To get all the Missed Meeting.
-     * @param {string} token - access token to make API calls.
-     * @param {array} body - API call body.
-     * @returns {string} response data that we get from API.
+     * @param string $token - access token to make API calls.
+     * @param MissedMeetings $missedMeetingsObject - API call body.
+     * @return mixed response data that we get from API.
      */
-    public static function missedMeetings($token, $body)
+    public static function missedMeetings($token, MissedMeetings $missedMeetingsObject)
     {
+        $body = $missedMeetingsObject->prepare();
         return self::postFetch($token, 'missed_meetings', $body);
     }
 
     /**
      * completedMeetings() : To get all the Completed Meetings.
-     * @param {string} token - access token to make API calls.
-     * @param {array} body - API call body.
-     * @returns {string} response data that we get from API.
+     * @param string $token - access token to make API calls.
+     * @param CompletedMeetings $completedMeetings - API call body.
+     * @return mixed respos$e data that we get from API.
      */
-    public static function completedMeetings($token, $body)
+    public static function completedMeetings($token, CompletedMeetings $completedMeetings)
     {
+        $body = $completedMeetings->prepare();
         return self::postFetch($token, 'completed_meetings', $body);
     }
 
   /**
  * editMeeting() : To Edit a specific meeting.
- * @param {string} token - access token to make API calls.
- * @param {any} body - API call body.
- * @returns {string} response data that we get from API.
+ * @param string $token - access token to make API calls.
+ * @param EditMeeting $editMeetingObject - API call body.
+ * @return mixed response data that we get from API.
  */
-    public static function editMeeting($token, $body) {
+    public static function editMeeting($token, EditMeeting $editMeetingObject) {
+        $body = $editMeetingObject->prepare();
         return self::postFetch($token, 'edit_meeting', $body);
     }
 
     /**
  * viewMeeting() : To get information of specific meeting.
- * @param {string} token - access token to make API calls.
- * @param {any} body - API call body.
- * @returns {string} response data that we get from API.
+ * @param string $token - access token to make API calls.
+ * @param ViewMeeting $viewMeetingObject - API call body.
+ * @return mixed response data that we get from API.
  */
-public static function viewMeeting(string $token, $body) {
+public static function viewMeeting(string $token, ViewMeeting $viewMeetingObject) {
+        $body = $viewMeetingObject->prepare();
         return self::postFetch($token, 'view_meeting', $body);
     }
 
     /**
  * recordingsList() : To get all the recording list.
- * @param {string} token - access token to make API calls.
- * @param {any} body - API call body.
- * @returns {string} response data that we get from API.
+ * @param string $token - access token to make API calls.
+ * @param RecordingsList $recordingsListObject - API call body.
+ * @return mixed response data that we get from API.
  */
-public static function recordingsList(string $token, $body) {
+public static function recordingsList(string $token, RecordingsList $recordingsListObject) {
+        $body = $recordingsListObject->prepare();
         return self::postFetch($token, 'recordings_list', $body);
     }
 
