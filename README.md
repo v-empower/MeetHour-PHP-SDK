@@ -1,11 +1,6 @@
-# MeetHour-PHP-SDK
-Meet Hour PHP SDK with Composer &amp; Guzzle
-
-
-
 # meethour/php-sdk
 
-React SDK for Meet Hour - (Typescript | Javascript Support)
+Meet Hour PHP SDK with Composer, GuzzleHTTP and support for Laravel/CorePHP/CodeIgnitor.
 
 [Meet Hour - 100% free video conference solution](https://meethour.io)
 Meet Hour is 100% free video conference solution with End to End Encrypted and many other features such as lobby mode, Donor box & Click&Pledge Connect for fundraising, Video call recording, Youtube Live Stream etc.
@@ -29,23 +24,57 @@ Meet Hour is 100% free video conference solution with End to End Encrypted and m
 
 # MeetHour SDK Implementation - Steps
 
-1. SDK Example Link - https://github.com/v-empower/MeetHour-Web-MobileSDKs
+1. SDK Example Link - https://github.com/v-empower/MeetHour-Web-MobileSDKs/tree/master/Web/PHP/CorePHP
 2. API Documentation Link - https://docs.v-empower.com/docs/MeetHour-API/
+
+### Pre-requisites
+1. Go to meethour.io and signup for Developer or Higher plan. Currently we offer 28 days free trial.
+2. Later go to Developer menu and be ready to use the credentials in this SDK below.
+
 
 ## Install
 
 ```
 composer install meethour/php-sdk
 
+require('./vendor/autoload.php');
+
 require('./vendor/meethour/php-sdk/src/autoload.php');
 
 ```
 
-### Steps to Integrate
-1. Hit the login API (Details mentioned below)
-2. Hit the schedule a Meeting API (Details mentioned below)
-3. Hit the Generate JWT API (Details mentioned below) - To join as Moderator.
-4. Use Component <MeetHourMeeting> to show the conference page.
+### Usage
+     Provide your credentials in the constructor of Login object and hit the login api to get your access token. Which will further be used for making rest of the api calls. 
+
+     <?php
+
+     require('./vendor/autoload.php');
+     require('./vendor/meethour/php-sdk/src/autoload.php');
+
+     use MeetHourApp\Services\MHApiService;
+     use MeetHourApp\Types\Login;
+     use MeetHourApp\Types\ScheduleMeeting;
+
+     $meetHourApiService = new MHApiService();   
+     $login = new Login($client_id, $client_secret, $grant_type, $username, $password);
+     $loginResponse = $meetHourApiService->login($login);
+     $scheduleBody = new ScheduleMeeting("Quick Meeting", "123456", date('h:i'), 'PM', date('d-m-Y'), 'Asia/Kolkata');  // You can give 
+     $response = $meetHourApiService->scheduleMeeting($loginResponse->access_token, $scheduleBody);
+     var_dump($response);
+     $test = new ViewMeeting($meeting_id);
+     $response = $meetHourApiService->timezone($loginResponse->access_token);
+     var_dump($response);
+
+     ?>
+
+
+#### MeetHourMeeting (Join Meeting )
+
+We need to follow the Javascript SDK for Join Meetin Module - https://github.com/v-empower/MeetHour-Web-MobileSDKs/tree/master/Web/Javascript/Generic-Javascript
+
+## Example
+
+Install and run the project from the sample SDK from here - https://github.com/v-empower/MeetHour-Web-MobileSDKs/Web/PHP/CorePHP
 
 ### API End Points Supported
 
@@ -64,7 +93,7 @@ Important points:
             public ?string $password;
             public ?string $username;
         }
-        $body = new Login(client_id, client_secret, grant_type, username, password);
+        $body = new Login($client_id, $client_secret, $grant_type, $username, $password);
         MHApiServices.login($body);
     ```
    => You have to pass respective values in the argument section. Hence, to get desired response.
@@ -106,7 +135,7 @@ Important points:
             public ?int $weeklyWeekDays;
         }
 
-        $body = new ScheduleMeeting(meeting_name, passcode, meeting_time, meeting_meridiem, meeting_date, timezone);
+        $body = new ScheduleMeeting($meeting_name, $passcode, $meeting_time, $meeting_meridiem, $meeting_date, $timezone);
         MHApiServices.scheduleMeeting($token, $body);
             
     ```
@@ -121,7 +150,7 @@ Important points:
             public ?array $config;
         }
 
-        $body = new GenerateJwt(meeting_id);
+        $body = new GenerateJwt($meeting_id);
         MHApiServices.generateJwt($token, $body);
     ```
 
@@ -135,274 +164,189 @@ Important points:
 5. To fetch access Token using Refresh Token: => https://docs.v-empower.com/docs/MeetHour-API/d851be1af9804-get-access-token-using-refresh-token
 
     ```
-        ApiServices.getRefreshToken(token: string, body: RefreshTokenType)
-
-        type RefreshTokenType {
-                client_id: string;
-                client_secret: string;
-                grant_type: string;
-                refresh_token: string;
+        class RefreshToken {
+            private string $client_id;
+            private string $client_secret;
+            private ?string $grant_type;
+            private string $refresh_token;
         }
+
+        $body = new RefreshToken($client_id, $client_secret, $refresh_token);
+        MHApiServices.getRefreshToken($token, $body);
     ```
 
 6. To add a contact in Meet Hour database: => https://docs.v-empower.com/docs/MeetHour-API/bd1e416413e8c-add-contact
 
     ```
-        ApiServices.addContact(token: string, body: AddContactType)
+        class ContactsList {
+            public ?int $limit;
+            public ?int $page;
+            public ?int $exclude_hosts;
+        }
 
-        type AddContactType {
-                country_code?: string;
-                email: string;
-                firstname: string;
-                image?: string;
-                is_show_portal?: boolean;
-                lastname?: string;
-                phone?: string;
-            }
+        $body = new ContactsList();
+        MHApiServices.contactList($token, $body);
     ```
 
 7. To get Timezones of various countries: => https://docs.v-empower.com/docs/MeetHour-API/c688c29bce9b9-timezone-list
 
     ```
-        ApiServices.timezone(token: string)
-
+        MHApiServices.timezone($token);
     ```
 
 8. To get list of all the contacts in your Meet Hour account: => https://api.meethour.io/api/{version}/customer/contacts
 
     ```
-        ApiServices.contactsList(token: string, body: ContactsType)
+        class ContactsList {
+            public string $email;
+            public string $firstname;
+            public ?string $country_code;
+            public ?string $image;
+            public ?bool $is_show_portal;
+            public ?string $lastname;
+            public ?string $phone;
+        }
 
-        type ContactsType {
-                exclude_hosts: number;
-                limit: number;
-                page: number;
-            }
+        $body = new ContactsList($email, $first_name);
+        MHApiServices.ContactsList($token, $body);
 
     ```
 
 9. To make changes in the existing contact details: => https://docs.v-empower.com/docs/MeetHour-API/28cae9187d215-edit-contact
 
        ```
-        ApiServices.editContact(token: string, body: EditContactType)
+        class EditContact {
+            public string $email;
+            public string $firstname;
+            public ?string $country_code;
+            public ?string $image;
+            public ?bool $is_show_portal;
+            public ?string $lastname;
+            public ?string $phone;
+        }
 
-        type EditContactType {
-                contact_id: number;
-                country_code: string;
-                email: string;
-                firstname: string;
-                image: string;
-                is_show_portal: boolean;
-                lastname: string;
-                phone: string;
-            }
+        $body = new EditContact($contact_id, $firstname, $email);
+        MHApiServices.editContact($token, $body);
 
         ``` 
 
 10. To get Upcoming Meetings: => https://docs.v-empower.com/docs/MeetHour-API/31df88388416d-upcoming-meetings
 
     ```
-        ApiServices.upcomingMeetings(token: string, body: {
-            limit: number;
-            page: number;
-        })
+        class UpcomingMeetings {
+            public ?int $limit;
+            public ?int $page;
+            public ?int $show_all;
+        }
+
+        $body = new UpcomingMeetings();
+        MHApiServices.upcomingMeetings($token, $body);
     ```
 
 11. To archive a meeting: => https://docs.v-empower.com/docs/MeetHour-API/1dd64523cc6bf-archive-meeting
 
     ```
-        ApiServices.archiveMeeting(
-                token: string,
-                body: {
-                    id?: number;
-            })
+        class ArchiveMeeting {
+            public string $id;
+        }
+
+        $body = new ArchiveMeeting($id);
+        MHApiServices.archiveMeeting($token, $body);
     ```
 
 12. To get the details of a missed meeting: => https://docs.v-empower.com/docs/MeetHour-API/92998e2dda102-missed-meetings
 
     ```
-        ApiServices.missedMeetings(
-            token: string,
-            body: {
-                limit: number;
-                page: number;
-            })
+        class MissedMeetings {
+            public ?int $limit;
+            public ?int $page;
+            public ?int $show_all;
+        }
+
+        $body = new MissedMeetings();
+        MHApiServices.missedMeetings($token, $body);
     ```
 
 13. To get completed meetings: => https://docs.v-empower.com/docs/MeetHour-API/aa9ef6a678250-completed-meetings
 
     ```
-        ApiServices.completedMeetings(
-            token: string,
-            body: {
-            limit: number;
-            page: number;
-            })
+        class CompletedMeetings {
+            public ?int $limit;
+            public ?int $page;
+            public ?int $show_all;
+        }
+
+        $body = new CompletedMeetings();
+        MHApiServices.completedMeetings($token, $body);
     ```
 
 14. To edit an existing meeting: => https://docs.v-empower.com/docs/MeetHour-API/5dedde36380b4-meeting-edit-meeting
 
     ```
-        ApiServices.editMeeting(token: string, body: EditMeetingType)
-
-        type EditMeeting {
-            agenda?: string;
-            attend?:
-                | Array<number>
-                | Array<UserObjectType>
-                | Array<number & UserObjectType>;
-            duration_hr?: number;
-            duration_min?: number;
-            enable_pre_registration?: number;
-            endBy?: string;
-            end_date_time?: string;
-            groups?: Array<number>;
-            hostusers?:
-                | Array<number>
-                | Array<UserObjectType>
-                | Array<number & UserObjectType>;
-            instructions?: string;
-            is_recurring?: number;
-            is_show_portal?: number;
-            meeting_agenda?: string;
-            meeting_date?: string;
-            meeting_id: string;
-            meeting_meridiem?: string;
-            meeting_name?: string;
-            meeting_time?: string;
-            meeting_topic?: string;
-            old_attend?:
-                | Array<number>
-                | Array<UserObjectType>
-                | Array<number & UserObjectType>;
-            options?: Array<string>;
-            passcode?: string;
-            recurring_type?: string;
-            repeat_interval?: number;
-            timezone?: string;
+        class EditMeeting {
+            public string $meeting_id;
+            public ?string $meeting_name;
+            public ?string $agenda;
+            public ?string $passcode;
+            public ?string $meeting_date;
+            public ?string $meeting_time;
+            public ?string $meeting_meridiem;
+            public ?int $duration_hr;
+            public ?int $duration_min;
+            public ?string $timezone;
+            public ?int $is_recurring;
+            public ?string $recurring_type;
+            public ?int $repeat_interval;
+            public ?int $weeklyWeekDays;
+            public ?string $monthlyBy;
+            public ?string $monthlyByDay;
+            public ?string $monthlyByWeekdayIndex;
+            public ?string $monthlyByWeekday;
+            public ?string $endBy;
+            public ?string $end_date_time;
+            public ?string $instructions;
+            public ?int $is_show_portal;
+            public ?int $enable_pre_registration;
+            public ?string $meeting_topic;
+            public ?string $meeting_agenda;
+            public ?array $options;
+            public ?array $old_attend;
+            public ?array $attend;
+            public ?array $groups;
+            public ?array $hostusers;
+            public ?string $default_recording_storage;
+            public ?array $live_stream_settings;
         }
 
-        type UserObjectType {
-            email?: string;
-            first_name?: string;
-            last_name?: string;
-        }
+        $body = new EditMeeting($meeting_id);
+        MHApiServices.editMeeting($token, $body);
     ```
 
 15. To view a meeting: => https://docs.v-empower.com/docs/MeetHour-API/7e9a0a1e0da7f-meeting-view-meeting
 
     ```
-        ApiServices.viewMeeting(
-            token: string, 
-            body: { meeting_id: string }
-            )
+        class ViewMeeting {
+            public string $meeting_id;
+        }
+
+        $body = new ViewMeeting($meeting_id);
+        MHApiServices.viewMeeting($token, $body);
     ```
 
 16. To get all the recordings list: => https://docs.v-empower.com/docs/MeetHour-API/ce7c4fd8cae7e-recording-list
 
 
     ```
-        ApiServices.recordingsList(token: string, body: RecordingsList)
-
-        type RecordingsList {
-            filter_by: string;
-            limit: number;
-            page: number;
+        class RecordingsList {
+            public ?string $filter_by;
+            public ?int $limit;
+            public ?int $page;
         }
+
+        $body = new RecordingsList();
+        MHApiServices.recordingsList($token, $body);
     ```
 
-### Modules
-
-This library exposes two components with similar properties, intended for different use-cases.
-
-#### MeetHourMeeting (Join Meeting Component)
-
-To be used with custom domains as-it-is in React projects:
-
-```js
-<MeetHourMeeting domain={YOUR_DOMAIN} roomName={YOUR_ROOM_NAME} apiKey={} apiBaseUR={} jwt={} pcode={} />
-```
-
-##### Properties specific to the `MeetHourMeeting` component
-
-###### `domain`
-
-Optional. Field used to retrieve the external_api.js file that initializes the IFrame. If omitted, defaults to `meethour.io`.
-
-###### `roomName` (Meeting ID)
-
-Required. String used when joining the meeting.
-
-
-###### `apiKey` (Meeting ID)
-
-Required. You will get apiKey from Developers page of Meet Hour Dashboard (https://portal.meethour.io).
-
-###### `jwt`
-
-Optional. Pass JWT if Moderator is trying to join the call.
-
-###### `pcode`
-
-Optional. Encrypted passcode of Meet Hour Meeting.
-
-###### `apiBaseURL`
-
-Optional. api.meethour.io as your default value.
-
-###### `getIFrameRef`
-
-Optional. Callback to retrieve the parent node of the IFrame for more control (e.g. styling).
-
-```js
-<MeetHourMeeting
-    ...
-    getIFrameRef = { iframeRef => { iframeRef.style.height = '700px'; } }
-/>
-```
-
-###### `onApiReady`
-
-Optional. Callback triggered when the external API is loaded to expose it for events and commands.
-
-```js
-<MeetHourMeeting
-    ...
-    onApiReady = { externalApi => console.log('Meet Hour External API', externalApi) }
-/>
-```
-
-###### `onReadyToClose`
-
-Optional. Callback triggered when the meeting is ready to be closed.
-
-```js
-<MeetHourMeeting
-    ...
-    onReadyToClose = { () => console.log('Meet Hour is ready to be closed') }
-/>
-```
-
-###### `configOverwrite`
-
-Optional. Object used for options overrides.
-
-###### `interfaceConfigOverwrite`
-
-Optional. Object used for more options overrides.
-
-
-###### `userInfo`
-
-Optional. Details about the participant that started the meeting.
-
-###### `spinner`
-
-Optional. Custom loading view while the IFrame is loading.
-
-## Example
-
-Install and run the project from the sample SDK from here - https://github.com/v-empower/MeetHour-Web-MobileSDKs/Web/Web-ReactSDK
 
 # Library & SDK
 
