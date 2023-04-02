@@ -354,5 +354,5 @@ Important points:
 2. iOS Cocoapods - https://cocoapods.org/pods/MeetHourSDK
 3. React Web NPM - https://www.npmjs.com/package/meet-hour-react-web-sdk
 4. React Native NPM - https://www.npmjs.com/package/react-native-meet-hour-sdk
-5. PHP SD - https://packagist.org/packages/meethour/php-sdk
+5. PHP SDK - https://packagist.org/packages/meethour/php-sdk
 5. Flutter Pub Dev - https://pub.dev/packages/meet_hour
