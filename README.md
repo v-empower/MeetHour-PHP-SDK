@@ -32,10 +32,10 @@ Meet Hour is 100% free video conference solution with End to End Encrypted and m
 2. Later go to Developer menu and be ready to use the credentials in this SDK below.
 
 
-## Install
+## Install (Works with Laravel & CodeIgnitor Also)
 
 ```
-composer install meethour/php-sdk
+composer require meethour/php-sdk
 
 require('./vendor/autoload.php');
 
