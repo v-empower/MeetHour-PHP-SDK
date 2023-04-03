@@ -56,7 +56,7 @@ class ScheduleMeeting
     $this->hostusers = null;
     $this->instructions = null;
     $this->is_recurring = null;
-    $this->is_show_portal = null;
+    $this->is_show_portal = 0;
     $this->meeting_agenda = null;
     $this->meeting_date = $meeting_date;
     $this->meeting_meridiem = $meeting_meridiem;
@@ -71,7 +71,7 @@ class ScheduleMeeting
     $this->passcode = $passcode;
     $this->recurring_type = null;
     $this->repeat_interval = null;
-    $this->send_calendar_invite = 1;
+    $this->send_calendar_invite = 0;
     $this->timezone = $timezone;
     $this->weeklyWeekDays = null;
   }
