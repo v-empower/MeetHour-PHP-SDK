@@ -2,13 +2,13 @@
 namespace MeetHourApp\Types;
 
 class ArchiveMeeting {
-    public string $id;
-    public function __construct(string $id) {
-        $this->id = $id;
+    public string $meeting_id;
+    public function __construct(string $meeting_id) {
+        $this->meeting_id = $meeting_id;
     }
     public function prepare() {
         return [
-            "id" => $this->id
+            "meeting_id" => $this->meeting_id
         ];
     }
 }

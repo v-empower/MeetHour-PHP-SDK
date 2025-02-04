@@ -6,7 +6,9 @@ use \GuzzleHttp\Exception\GuzzleException;
 use \GuzzleHttp\RequestOptions;
 use MeetHourApp\Types\ScheduleMeeting;
 use MeetHourApp\Types\AddContact;
+use MeetHourApp\Types\DeleteContact;
 use MeetHourApp\Types\ArchiveMeeting;
+use MeetHourApp\Types\DeleteMeeting;
 use MeetHourApp\Types\CompletedMeetings;
 use MeetHourApp\Types\ContactsList;
 use MeetHourApp\Types\EditContact;
@@ -14,6 +16,8 @@ use MeetHourApp\Types\EditMeeting;
 use MeetHourApp\Types\GenerateJwt;
 use MeetHourApp\Types\Login;
 use MeetHourApp\Types\MissedMeetings;
+use MeetHourApp\Types\GetSingleRecording;
+use MeetHourApp\Types\DeleteRecording;
 use MeetHourApp\Types\RecordingsList;
 use MeetHourApp\Types\RefreshToken;
 use MeetHourApp\Types\UpcomingMeetings;
@@ -38,16 +42,24 @@ class MHApiService {
                 return self::BASE_URL . '/oauth/token';
             case 'add_contact':
                 return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/addcontact';
+            case 'delete_contact':
+                return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/deletecontact';
             case 'contacts_list':
                 return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/contacts';
             case 'schedule_meeting':
                 return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/schedulemeeting';
+            case 'delete_meeting':
+                return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/deletemeeting';
             case 'get_jwt':
                 return self::BASE_URL . '/api/' . self::API_VERSION . '/getjwt';
             case 'upcoming_meeting':
                 return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/upcomingmeetings';
             case 'timezone':
                 return self::BASE_URL . '/api/' . self::API_VERSION . '/getTimezone';
+            case 'get_single_recording':
+                return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/getsinglerecording';
+            case 'delete_recording':
+                return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/deleterecording';
             case 'recordings_list':
                 return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/videorecordinglist';
             case 'edit_meeting':
@@ -169,6 +181,17 @@ class MHApiService {
     }
 
     /**
+     * deleteContact() : To delete contact in Meet Hour Database.
+     * @param string $token - access token to make API calls.
+     * @param DeleteContact $deleteContactObject - API call body.
+     * @return mixed response data that we get from API.
+     */
+    public static function deleteContact($token, DeleteContact $deleteContactObject) {
+        $body = $deleteContactObject->prepare();
+        return self::postFetch($token, 'delete_contact', $body);
+    }
+
+    /**
      * timezone() : To get all the timezones used in Meet Hour while Meeting is being Scheduled.
      * @param string $token - access token to make API calls.
      * @return mixed response data that we get from API.
@@ -210,6 +233,18 @@ class MHApiService {
     {
         $body = $scheduleMeetingObject->prepare();
         return self::postFetch($token, 'schedule_meeting', $body);
+    }
+
+    /**
+     * deleteMeeting() : To delete a meeting from Meet Hour Database.
+     * @param string $token - access token to make API calls.
+     * @param DeleteMeeting $deleteMeetingObject - API call body.
+     * @return mixed response data that we get from API.
+     */
+    public static function deleteMeeting($token, DeleteMeeting $deleteMeetingObject)
+    {
+        $body = $deleteMeetingObject->prepare();
+        return self::postFetch($token, 'delete_meeting', $body);
     }
 
     /**
@@ -293,4 +328,25 @@ public static function recordingsList(string $token, RecordingsList $recordingsL
         return self::postFetch($token, 'recordings_list', $body);
     }
 
+        /**
+     * getSingleRecording() : To get single recording from Meet Hour Database.
+     * @param string $token - access token to make API calls.
+     * @param GetSingleRecording $getSingleRecordingObject - API call body.
+     * @return mixed response data that we get from API.
+     */
+    public static function getSingleRecording($token, GetSingleRecording $getSingleRecordingObject) {
+        $body = $getSingleRecordingObject->prepare();
+        return self::postFetch($token, 'get_single_recording', $body);
+    }
+
+/**
+     * deleteRecording() : To delete recording from Meet Hour Database.
+     * @param string $token - access token to make API calls.
+     * @param DeleteRecording $deleteRecordingObject - API call body.
+     * @return mixed response data that we get from API.
+     */
+    public static function deleteRecording($token, DeleteRecording $deleteRecordingObject) {
+        $body = $deleteRecordingObject->prepare();
+        return self::postFetch($token, 'delete_recording', $body);
+    }
 }

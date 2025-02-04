@@ -15,3 +15,7 @@ require_once(__DIR__ .'/MeetHourApp/Types/ScheduleMeeting.php');
 require_once(__DIR__ .'/MeetHourApp/Types/UpcomingMeetings.php');
 require_once(__DIR__ .'/MeetHourApp/Types/MissedMeetings.php');
 require_once(__DIR__ .'/MeetHourApp/Types/ViewMeeting.php');
+require_once(__DIR__ .'/MeetHourApp/Types/DeleteMeeting.php');
+require_once(__DIR__ .'/MeetHourApp/Types/DeleteContact.php');
+require_once(__DIR__ .'/MeetHourApp/Types/DeleteRecording.php');
+require_once(__DIR__ .'/MeetHourApp/Types/GetSingleRecording.php');
