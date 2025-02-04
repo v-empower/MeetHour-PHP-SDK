@@ -1,9 +1,9 @@
 <?php
 namespace MeetHourApp\Types;
 class DeleteMeeting {
-    public int $meeting_id;
+    public string $meeting_id;
 
-    public function __construct(int $meeting_id) {
+    public function __construct(string $meeting_id) {
         $this->meeting_id = $meeting_id;
     }
     public function prepare() {
