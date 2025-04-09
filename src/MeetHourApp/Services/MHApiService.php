@@ -91,11 +91,21 @@ class MHApiService {
         return $url;
     }
 
-    private static function getHeaders(string $token): array {
-        return [
+    private static function getHeaders(string $token,  array $additional_headers=[]): array {
+
+        $headers = [
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . $token,
         ];
+
+        if(isset($additional_headers) && is_array($additional_headers) && count($additional_headers)>0) {
+            foreach($additional_headers as $key => $value)
+            {
+                $headers[$key] = $value;
+            }
+        }
+        
+        return $headers;
     }
 
     /**
@@ -106,7 +116,7 @@ class MHApiService {
      * @param array $pathParam  endpoint End Point types.
      * @return mixed response data that we get from API
     **/
-         private static function postFetch(string $token, string $endpoint, array $body, array $pathParam = []) {
+         private static function postFetch(string $token, string $endpoint, array $body, array $pathParam = [],  array $additional_headers=[]) {
         $constructedUrl = self::substitutePathParameter(
             self::apiEndpointUrl($endpoint),
             $pathParam
@@ -114,7 +124,7 @@ class MHApiService {
         try {
             $client = new Client();
             $response = $client->post($constructedUrl, [
-                'headers' => self::getHeaders($token),
+                'headers' => self::getHeaders($token, $additional_headers),
                 'json' => $body
             ]);
             if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 600) {
@@ -144,9 +154,9 @@ class MHApiService {
      * @param RefreshToken $refreshTokenObject API call body.
      * @return mixed response data that we get from API.
      */
-    public static function getRefreshToken(string $token, RefreshToken $refreshTokenObject) {
+    public static function getRefreshToken(string $token, RefreshToken $refreshTokenObject, array $additional_headers=[]) {
         $body = $refreshTokenObject->prepare();
-        return self::postFetch($token, 'refresh_token', $body);
+        return self::postFetch($token, 'refresh_token', $body, [], $additional_headers);
     }
 
     /**
@@ -154,8 +164,8 @@ class MHApiService {
      * @param string $token access token to make API calls.
      * @return mixed response data that we get from API.
      */
-    public static function userDetails(string $token) {
-        return self::postFetch($token, 'user_details', []);
+    public static function userDetails(string $token, array $additional_headers=[]) {
+        return self::postFetch($token, 'user_details', [], [], $additional_headers);
     }
 
      /**
@@ -164,9 +174,9 @@ class MHApiService {
      * @param GenerateJwt $generateJwtObject - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function generateJwt($token, GenerateJwt $generateJwtObject) {
+    public static function generateJwt($token, GenerateJwt $generateJwtObject, array $additional_headers=[]) {
         $body = $generateJwtObject->prepare();
-        return self::postFetch($token, 'get_jwt', $body);
+        return self::postFetch($token, 'get_jwt', $body, [], $additional_headers);
     }
 
     /**
@@ -175,9 +185,9 @@ class MHApiService {
      * @param AddContact $addContactObject - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function addContact($token, AddContact $addContactObject) {
+    public static function addContact($token, AddContact $addContactObject, array $additional_headers=[]) {
         $body = $addContactObject->prepare();
-        return self::postFetch($token, 'add_contact', $body);
+        return self::postFetch($token, 'add_contact', $body, [], $additional_headers);
     }
 
     /**
@@ -186,9 +196,9 @@ class MHApiService {
      * @param DeleteContact $deleteContactObject - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function deleteContact($token, DeleteContact $deleteContactObject) {
+    public static function deleteContact($token, DeleteContact $deleteContactObject, array $additional_headers=[]) {
         $body = $deleteContactObject->prepare();
-        return self::postFetch($token, 'delete_contact', $body);
+        return self::postFetch($token, 'delete_contact', $body, [], $additional_headers);
     }
 
     /**
@@ -196,8 +206,8 @@ class MHApiService {
      * @param string $token - access token to make API calls.
      * @return mixed response data that we get from API.
      */
-    public static function timezone($token) {
-        return self::postFetch($token, 'timezone', []);
+    public static function timezone($token, array $additional_headers=[]) {
+        return self::postFetch($token, 'timezone', [], [], $additional_headers);
     }
 
     /**
@@ -206,9 +216,9 @@ class MHApiService {
      * @param ContactsList $contactsListObject - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function contactsList($token, ContactsList $contactsListObject) {
+    public static function contactsList($token, ContactsList $contactsListObject, array $additional_headers=[]) {
         $body = $contactsListObject->prepare();
-        return self::postFetch($token, 'contacts_list', $body);
+        return self::postFetch($token, 'contacts_list', $body, [], $additional_headers);
     }
 
     /**
@@ -217,9 +227,9 @@ class MHApiService {
      * @param EditContact $editContactObject - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function editContact($token, EditContact $editContactObject) {
+    public static function editContact($token, EditContact $editContactObject, array $additional_headers=[]) {
         $body = $editContactObject->prepare();
-        return self::postFetch($token, 'edit_contact', $body);
+        return self::postFetch($token, 'edit_contact', $body, [], $additional_headers);
     }
 
     
@@ -229,10 +239,10 @@ class MHApiService {
      * @param ScheduleMeeting $scheduleMeetingObject - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function scheduleMeeting($token, ScheduleMeeting $scheduleMeetingObject)
+    public static function scheduleMeeting($token, ScheduleMeeting $scheduleMeetingObject, array $additional_headers=[])
     {
         $body = $scheduleMeetingObject->prepare();
-        return self::postFetch($token, 'schedule_meeting', $body);
+        return self::postFetch($token, 'schedule_meeting', $body, [], $additional_headers);
     }
 
     /**
@@ -241,10 +251,10 @@ class MHApiService {
      * @param DeleteMeeting $deleteMeetingObject - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function deleteMeeting($token, DeleteMeeting $deleteMeetingObject)
+    public static function deleteMeeting($token, DeleteMeeting $deleteMeetingObject, array $additional_headers=[])
     {
         $body = $deleteMeetingObject->prepare();
-        return self::postFetch($token, 'delete_meeting', $body);
+        return self::postFetch($token, 'delete_meeting', $body, [], $additional_headers);
     }
 
     /**
@@ -253,10 +263,10 @@ class MHApiService {
      * @param UpcomingMeetings $upcomingMeetingsObject - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function upcomingMeetings($token, UpcomingMeetings $upcomingMeetingsObject)
+    public static function upcomingMeetings($token, UpcomingMeetings $upcomingMeetingsObject, array $additional_headers=[])
     {
         $body = $upcomingMeetingsObject->prepare();
-        return self::postFetch($token, 'upcoming_meeting', $body);
+        return self::postFetch($token, 'upcoming_meeting', $body, [], $additional_headers);
     }
 
     /**
@@ -265,10 +275,10 @@ class MHApiService {
      * @param ArchiveMeeting $archiveMeeting - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function archiveMeeting($token, ArchiveMeeting $archiveMeeting)
+    public static function archiveMeeting($token, ArchiveMeeting $archiveMeeting, array $additional_headers=[])
     {
         $body = $archiveMeeting->prepare();
-        return self::postFetch($token, 'archive_meeting', $body);
+        return self::postFetch($token, 'archive_meeting', $body, [], $additional_headers);
     }
 
     /**
@@ -277,10 +287,10 @@ class MHApiService {
      * @param MissedMeetings $missedMeetingsObject - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function missedMeetings($token, MissedMeetings $missedMeetingsObject)
+    public static function missedMeetings($token, MissedMeetings $missedMeetingsObject, array $additional_headers=[])
     {
         $body = $missedMeetingsObject->prepare();
-        return self::postFetch($token, 'missed_meetings', $body);
+        return self::postFetch($token, 'missed_meetings', $body, [], $additional_headers);
     }
 
     /**
@@ -289,10 +299,10 @@ class MHApiService {
      * @param CompletedMeetings $completedMeetings - API call body.
      * @return mixed respos$e data that we get from API.
      */
-    public static function completedMeetings($token, CompletedMeetings $completedMeetings)
+    public static function completedMeetings($token, CompletedMeetings $completedMeetings, array $additional_headers=[])
     {
         $body = $completedMeetings->prepare();
-        return self::postFetch($token, 'completed_meetings', $body);
+        return self::postFetch($token, 'completed_meetings', $body, [], $additional_headers);
     }
 
   /**
@@ -301,9 +311,9 @@ class MHApiService {
  * @param EditMeeting $editMeetingObject - API call body.
  * @return mixed response data that we get from API.
  */
-    public static function editMeeting($token, EditMeeting $editMeetingObject) {
+    public static function editMeeting($token, EditMeeting $editMeetingObject, array $additional_headers=[]) {
         $body = $editMeetingObject->prepare();
-        return self::postFetch($token, 'edit_meeting', $body);
+        return self::postFetch($token, 'edit_meeting', $body, [], $additional_headers);
     }
 
     /**
@@ -312,9 +322,9 @@ class MHApiService {
  * @param ViewMeeting $viewMeetingObject - API call body.
  * @return mixed response data that we get from API.
  */
-public static function viewMeeting(string $token, ViewMeeting $viewMeetingObject) {
+public static function viewMeeting(string $token, ViewMeeting $viewMeetingObject, array $additional_headers=[]) {
         $body = $viewMeetingObject->prepare();
-        return self::postFetch($token, 'view_meeting', $body);
+        return self::postFetch($token, 'view_meeting', $body, [], $additional_headers);
     }
 
     /**
@@ -323,9 +333,9 @@ public static function viewMeeting(string $token, ViewMeeting $viewMeetingObject
  * @param RecordingsList $recordingsListObject - API call body.
  * @return mixed response data that we get from API.
  */
-public static function recordingsList(string $token, RecordingsList $recordingsListObject) {
+public static function recordingsList(string $token, RecordingsList $recordingsListObject, array $additional_headers=[]) {
         $body = $recordingsListObject->prepare();
-        return self::postFetch($token, 'recordings_list', $body);
+        return self::postFetch($token, 'recordings_list', $body, [], $additional_headers);
     }
 
         /**
@@ -334,9 +344,9 @@ public static function recordingsList(string $token, RecordingsList $recordingsL
      * @param GetSingleRecording $getSingleRecordingObject - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function getSingleRecording($token, GetSingleRecording $getSingleRecordingObject) {
+    public static function getSingleRecording($token, GetSingleRecording $getSingleRecordingObject, array $additional_headers=[]) {
         $body = $getSingleRecordingObject->prepare();
-        return self::postFetch($token, 'get_single_recording', $body);
+        return self::postFetch($token, 'get_single_recording', $body, [], $additional_headers);
     }
 
 /**
@@ -345,8 +355,8 @@ public static function recordingsList(string $token, RecordingsList $recordingsL
      * @param DeleteRecording $deleteRecordingObject - API call body.
      * @return mixed response data that we get from API.
      */
-    public static function deleteRecording($token, DeleteRecording $deleteRecordingObject) {
+    public static function deleteRecording($token, DeleteRecording $deleteRecordingObject, array $additional_headers=[]) {
         $body = $deleteRecordingObject->prepare();
-        return self::postFetch($token, 'delete_recording', $body);
+        return self::postFetch($token, 'delete_recording', $body, [], $additional_headers);
     }
 }
