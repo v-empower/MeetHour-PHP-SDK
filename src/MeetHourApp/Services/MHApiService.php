@@ -24,60 +24,61 @@ use MeetHourApp\Types\UpcomingMeetings;
 use MeetHourApp\Types\ViewMeeting;
 
 class MHApiService {
-    private const BASE_URL = 'https://api.meethour.io';
+    private static $BASE_URL = 'https://api.meethour.io';
     private const API_VERSION = 'v1.2';
 
-    private $httpClient;
+    private $httpClient ;
     private static $accessToken;
 
-    public function __construct() {
+    public function __construct($baseUrl = 'https://api.meethour.io') {
+        self::$BASE_URL = $baseUrl;
         $this->httpClient = new Client([
-            'base_uri' => self::BASE_URL
+            'base_uri' => self::$BASE_URL
         ]);
     }
 
     private static function apiEndpointUrl(string $endpoint): string {
         switch ($endpoint) {
             case 'login':
-                return self::BASE_URL . '/oauth/token';
+                return self::$BASE_URL . '/oauth/token';
             case 'add_contact':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/addcontact';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/customer/addcontact';
             case 'delete_contact':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/deletecontact';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/customer/deletecontact';
             case 'contacts_list':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/contacts';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/customer/contacts';
             case 'schedule_meeting':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/schedulemeeting';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/meeting/schedulemeeting';
             case 'delete_meeting':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/deletemeeting';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/meeting/deletemeeting';
             case 'get_jwt':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/getjwt';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/getjwt';
             case 'upcoming_meeting':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/upcomingmeetings';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/meeting/upcomingmeetings';
             case 'timezone':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/getTimezone';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/getTimezone';
             case 'get_single_recording':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/getsinglerecording';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/customer/getsinglerecording';
             case 'delete_recording':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/deleterecording';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/customer/deleterecording';
             case 'recordings_list':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/videorecordinglist';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/customer/videorecordinglist';
             case 'edit_meeting':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/editmeeting';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/meeting/editmeeting';
             case 'edit_contact':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/editcontact';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/customer/editcontact';
             case 'view_meeting':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/viewmeeting';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/meeting/viewmeeting';
             case 'archive_meeting':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/archivemeeting';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/meeting/archivemeeting';
             case 'missed_meetings':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/missedmeetings';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/meeting/missedmeetings';
             case 'completed_meetings':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/meeting/completedmeetings';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/meeting/completedmeetings';
             case 'user_details':
-                return self::BASE_URL . '/api/' . self::API_VERSION . '/customer/user_details';
+                return self::$BASE_URL . '/api/' . self::API_VERSION . '/customer/user_details';
             case 'refresh_token':
-                return self::BASE_URL . '/oauth/token';
+                return self::$BASE_URL . '/oauth/token';
             default:
                 throw new \Exception('Invalid endpoint');
         }
